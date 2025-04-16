@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import Products from "./pages/Products";
 
 // Create placeholder pages for other routes
 const Procurement = () => <Dashboard />;
@@ -13,7 +14,6 @@ const Inventory = () => <Dashboard />;
 const Suppliers = () => <Dashboard />;
 const Documents = () => <Dashboard />;
 const Reports = () => <Dashboard />;
-const Products = () => <Dashboard />;
 const Settings = () => <Dashboard />;
 const Help = () => <Dashboard />;
 
