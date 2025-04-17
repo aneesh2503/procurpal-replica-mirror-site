@@ -24,3 +24,10 @@ export type NLPResult = {
   entities: Entity[];
   sentiment: 'positive' | 'neutral' | 'negative';
 };
+
+export type ConversationContext = {
+  recentMessages: Message[];
+  detectedEntities: Entity[];
+  currentIntent?: Intent;
+  conversationSummary?: string;
+};

@@ -1,5 +1,5 @@
 
-import { Intent, NLPResult, Entity, Message } from "./types";
+import { Intent, NLPResult, Entity, Message, ConversationContext } from "./types";
 
 // Sample database of procurement-related information
 const productDatabase = {
@@ -95,10 +95,26 @@ function analyzeSentiment(message: string): 'positive' | 'neutral' | 'negative' 
 }
 
 // Process the message and generate NLP results
-function processNLP(message: string): NLPResult {
+function processNLP(message: string, context?: string): NLPResult {
   const intent = detectIntent(message);
   const entities = extractEntities(message);
   const sentiment = analyzeSentiment(message);
+  
+  // Use context to improve NLP results if available
+  if (context) {
+    // Extract additional entities from context that might be relevant
+    const contextEntities = extractEntities(context);
+    
+    // Add context entities that aren't already in the current message entities
+    for (const contextEntity of contextEntities) {
+      if (!entities.some(e => e.type === contextEntity.type && e.value === contextEntity.value)) {
+        entities.push({
+          ...contextEntity,
+          confidence: contextEntity.confidence * 0.8, // Slightly lower confidence for context entities
+        });
+      }
+    }
+  }
   
   return {
     intent,
@@ -108,11 +124,73 @@ function processNLP(message: string): NLPResult {
   };
 }
 
+// Create a context summary from recent messages
+function buildContextSummary(messages: Message[]): string {
+  if (messages.length === 0) return "";
+  
+  // Extract the most recent user intent if available
+  const lastUserMessageWithIntent = [...messages]
+    .reverse()
+    .find(m => !m.isBot && m.intent);
+  
+  // Extract all unique entities mentioned
+  const mentionedEntities = new Set<string>();
+  messages.forEach(msg => {
+    const msgEntities = extractEntities(msg.content);
+    msgEntities.forEach(entity => {
+      mentionedEntities.add(`${entity.type}:${entity.value}`);
+    });
+  });
+  
+  // Build context summary
+  let summary = "";
+  
+  if (lastUserMessageWithIntent?.intent) {
+    summary += `Intent: ${lastUserMessageWithIntent.intent}. `;
+  }
+  
+  if (mentionedEntities.size > 0) {
+    summary += "Mentioned: ";
+    summary += Array.from(mentionedEntities).map(e => {
+      const [type, value] = e.split(':');
+      return `${value} (${type})`;
+    }).join(', ');
+  }
+  
+  return summary;
+}
+
 // Generate contextual responses based on NLP results
-function generateResponse(nlpResult: NLPResult, message: string): string {
+function generateResponse(nlpResult: NLPResult, message: string, recentMessages: Message[] = []): string {
   const { intent, entities, sentiment } = nlpResult;
   
-  // Handle different intents
+  // Check for follow-up questions
+  const isFollowUp = recentMessages.length > 0 && 
+    !message.endsWith("?") && 
+    message.length < 20;
+  
+  // If it seems like a follow-up to previous conversation
+  if (isFollowUp && recentMessages.length > 0) {
+    const previousBotMessage = [...recentMessages]
+      .reverse()
+      .find(m => m.isBot);
+    
+    if (previousBotMessage) {
+      // Handle follow-up based on previous bot message and current message
+      if (previousBotMessage.content.includes("Would you like") && 
+         (message.toLowerCase().includes("yes") || message.toLowerCase().includes("sure"))) {
+        if (previousBotMessage.content.includes("inventory")) {
+          return "I've prepared a detailed inventory report. There are 5 items with critically low stock levels that need attention. Would you like me to create a reorder plan for these items?";
+        } else if (previousBotMessage.content.includes("supplier")) {
+          return "Based on your requirements, here are the top 3 recommended suppliers: Tech Solutions Ltd. (Electronics), Office Comfort Solutions (Furniture), and Global Supplies (General). Would you like more details about any of these suppliers?";
+        } else if (previousBotMessage.content.includes("order")) {
+          return "Great! I've initiated the order process. The estimated delivery date is April 24, 2025. Would you like to receive email notifications about this order?";
+        }
+      }
+    }
+  }
+  
+  // Handle different intents with context awareness
   switch (intent) {
     case "help":
       return "I can help you with procurement tasks like finding suppliers, analyzing inventory, managing orders, checking product pricing, and generating reports. What would you like assistance with today?";
@@ -172,12 +250,18 @@ function generateResponse(nlpResult: NLPResult, message: string): string {
   }
 }
 
-export function processUserMessage(inputMessage: string): string {
-  // Process the message using NLP
-  const nlpResult = processNLP(inputMessage);
+export function processUserMessage(inputMessage: string, recentMessages: Message[] = []): string {
+  // Build context from recent messages
+  const contextString = recentMessages
+    .slice(-3)
+    .map(msg => msg.content)
+    .join(" | ");
+  
+  // Process the message using NLP with context
+  const nlpResult = processNLP(inputMessage, contextString);
   
   // Generate a contextual response
-  return generateResponse(nlpResult, inputMessage);
+  return generateResponse(nlpResult, inputMessage, recentMessages);
 }
 
 // Export these functions for unit testing and future expansion
@@ -186,4 +270,5 @@ export const nlpHelpers = {
   extractEntities,
   analyzeSentiment,
   processNLP,
+  buildContextSummary,
 };

@@ -38,6 +38,17 @@ export function ChatMessage({ message }: ChatMessageProps) {
         >
           {formatTime(message.timestamp)}
         </div>
+        
+        {/* Uncomment for debugging
+        {message.context && (
+          <div className="mt-2 pt-2 border-t border-gray-200 text-xs text-gray-400">
+            <details>
+              <summary>Context</summary>
+              <p className="mt-1">{message.context}</p>
+            </details>
+          </div>
+        )}
+        */}
       </div>
     </div>
   );

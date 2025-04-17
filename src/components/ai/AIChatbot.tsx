@@ -36,6 +36,19 @@ export function AIChatbot() {
     }
   }, [isOpen]);
 
+  // Update conversation context whenever messages change
+  useEffect(() => {
+    if (messages.length <= 1) return; // Skip if only welcome message
+    
+    // Build context from the most recent messages
+    const recentMessages = messages.slice(-5); // Last 5 messages
+    const contextSummary = recentMessages
+      .map(msg => `${msg.isBot ? 'Bot' : 'User'}: ${msg.content}`)
+      .join('\n');
+    
+    setConversationContext(contextSummary);
+  }, [messages]);
+
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
 
@@ -51,16 +64,11 @@ export function AIChatbot() {
     setInputMessage("");
     setIsTyping(true);
 
-    // Update conversation context based on recent messages
-    const recentMessages = [...messages.slice(-3), userMessage]
-      .map(msg => msg.content)
-      .join(" | ");
-    setConversationContext(recentMessages);
-
     // Add a small delay to simulate processing time
     setTimeout(() => {
       try {
-        const botResponse = processUserMessage(userMessage.content);
+        // Pass recent messages for context-aware responses
+        const botResponse = processUserMessage(userMessage.content, messages);
 
         const newBotMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -109,8 +117,32 @@ export function AIChatbot() {
     }, 100);
   };
 
+  // Clear chat history and context
+  const handleClearChat = () => {
+    setMessages([
+      {
+        id: "welcome-new",
+        content: "Chat history cleared. How can I assist you with procurement today?",
+        isBot: true,
+        timestamp: new Date(),
+      },
+    ]);
+    setConversationContext("");
+  };
+
   const ChatbotContent = () => (
     <>
+      <div className="flex justify-between items-center px-4 py-2 border-b border-gray-100">
+        <h3 className="text-sm font-medium">ProcurPal AI Assistant</h3>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleClearChat}
+          className="text-xs h-7"
+        >
+          Clear Chat
+        </Button>
+      </div>
       <ChatMessageList messages={messages} isTyping={isTyping} />
       <div className="px-4 py-2 border-t border-gray-100">
         {messages.length === 1 && (
