@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,7 +26,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Message = {
   id: string;
@@ -51,7 +50,7 @@ export function AIChatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,7 +69,6 @@ export function AIChatbot() {
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputMessage,
@@ -82,7 +80,6 @@ export function AIChatbot() {
     setInputMessage("");
     setIsTyping(true);
 
-    // Simulate bot thinking and response
     setTimeout(() => {
       const botResponses: { [key: string]: string } = {
         help: "I can help you with procurement tasks like finding suppliers, analyzing inventory, recommending reorder quantities, and more. Just tell me what you need assistance with!",
@@ -94,14 +91,12 @@ export function AIChatbot() {
       const lowerCaseInput = inputMessage.toLowerCase();
       let botResponse = "I'm not sure how to help with that specific request. Could you try asking something about inventory, suppliers, procurement, or reports?";
 
-      // Check for keywords in the message
       Object.keys(botResponses).forEach((key) => {
         if (lowerCaseInput.includes(key)) {
           botResponse = botResponses[key];
         }
       });
 
-      // Add bot message
       const newBotMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: botResponse,
