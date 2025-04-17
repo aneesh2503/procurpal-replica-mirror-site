@@ -8,7 +8,7 @@ export type Message = {
   intent?: string; // For storing detected user intent
 };
 
-export type Intent = 'help' | 'inventory' | 'supplier' | 'report' | 'pricing' | 'order' | 'unknown';
+export type Intent = 'help' | 'inventory' | 'supplier' | 'report' | 'pricing' | 'order' | 'form' | 'unknown';
 
 export type EntityType = 'product' | 'supplier' | 'date' | 'quantity' | 'price' | 'location';
 
@@ -30,4 +30,20 @@ export type ConversationContext = {
   detectedEntities: Entity[];
   currentIntent?: Intent;
   conversationSummary?: string;
+};
+
+export type IntakeFormData = {
+  name: string;
+  email: string;
+  company: string;
+  role: string;
+  requirements: string;
+  priority: 'low' | 'medium' | 'high';
+};
+
+export type IntakeFormState = {
+  isVisible: boolean;
+  data: IntakeFormData;
+  currentStep: number;
+  totalSteps: number;
 };
