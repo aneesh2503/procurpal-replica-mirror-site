@@ -54,8 +54,8 @@ const IntakeForm = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">Intake Form</h2>
+    <div className="max-w-xl mx-auto p-6 bg-custom-background rounded-lg shadow-lg border-2 border-custom-primary/20">
+      <h2 className="text-2xl font-bold mb-6 text-center text-custom-text">Intake Form</h2>
       <AIChatbot form={form} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -64,11 +64,15 @@ const IntakeForm = () => {
             name="fullName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel className="text-custom-text">Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input 
+                    placeholder="John Doe" 
+                    {...field} 
+                    className="border-custom-secondary focus:ring-custom-primary"
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -78,11 +82,16 @@ const IntakeForm = () => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-custom-text">Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="john@example.com" {...field} />
+                  <Input 
+                    type="email" 
+                    placeholder="john@example.com" 
+                    {...field} 
+                    className="border-custom-secondary focus:ring-custom-primary"
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -92,11 +101,16 @@ const IntakeForm = () => {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number</FormLabel>
+                <FormLabel className="text-custom-text">Phone Number</FormLabel>
                 <FormControl>
-                  <Input type="tel" placeholder="(123) 456-7890" {...field} />
+                  <Input 
+                    type="tel" 
+                    placeholder="(123) 456-7890" 
+                    {...field} 
+                    className="border-custom-secondary focus:ring-custom-primary"
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -106,14 +120,14 @@ const IntakeForm = () => {
             name="dateOfBirth"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Date of Birth</FormLabel>
+                <FormLabel className="text-custom-text">Date of Birth</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full pl-3 text-left font-normal border-custom-secondary",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -122,7 +136,7 @@ const IntakeForm = () => {
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50 text-custom-primary" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -139,12 +153,17 @@ const IntakeForm = () => {
                     />
                   </PopoverContent>
                 </Popover>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
 
-          <Button type="submit" className="w-full">Submit</Button>
+          <Button 
+            type="submit" 
+            className="w-full bg-custom-primary hover:bg-custom-primary/90 text-white"
+          >
+            Submit
+          </Button>
         </form>
       </Form>
     </div>

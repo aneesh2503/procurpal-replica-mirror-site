@@ -23,9 +23,9 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ form }) => {
       <Button
         onClick={handleAIAssist}
         variant="outline"
-        className="flex gap-2 items-center"
+        className="flex gap-2 items-center border-custom-primary text-custom-primary hover:bg-custom-primary/10"
       >
-        <MessagesSquare className="h-4 w-4" />
+        <MessagesSquare className="h-4 w-4 text-custom-primary" />
         Fill with AI
       </Button>
     </div>
