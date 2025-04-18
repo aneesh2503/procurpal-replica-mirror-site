@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/sonner";
+import AIChatbot from './AIChatbot';
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
@@ -33,7 +34,7 @@ const formSchema = z.object({
   }),
 });
 
-type FormData = z.infer<typeof formSchema>;
+export type FormData = z.infer<typeof formSchema>;
 
 const IntakeForm = () => {
   const form = useForm<FormData>({
@@ -55,6 +56,7 @@ const IntakeForm = () => {
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">Intake Form</h2>
+      <AIChatbot form={form} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
