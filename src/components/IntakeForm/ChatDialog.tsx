@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { SendHorizontal } from "lucide-react";
 import { type FormData } from './IntakeForm';
 import { useForm } from 'react-hook-form';
+import { isValid, parse } from 'date-fns';
 
 interface Message {
   role: 'user' | 'bot';
@@ -59,18 +61,37 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
         content: `Thanks! And finally, what's your date of birth? (YYYY-MM-DD format)`
       }]);
     } else if (lastBotMessage.includes('date of birth')) {
-      try {
-        const date = new Date(userMessage);
-        form.setValue('dateOfBirth', date);
+      // Improved date parsing
+      // Try different date formats
+      const formats = ['yyyy-MM-dd', 'MM/dd/yyyy', 'dd/MM/yyyy'];
+      let validDate = null;
+      
+      // First try direct Date construction
+      const directDate = new Date(userMessage);
+      if (isValid(directDate) && directDate.toString() !== 'Invalid Date') {
+        validDate = directDate;
+      } else {
+        // Try parsing with different formats
+        for (const format of formats) {
+          const parsedDate = parse(userMessage, format, new Date());
+          if (isValid(parsedDate)) {
+            validDate = parsedDate;
+            break;
+          }
+        }
+      }
+      
+      if (validDate) {
+        form.setValue('dateOfBirth', validDate);
         setMessages(prev => [...prev, {
           role: 'bot',
           content: `Perfect! I've filled out all your information. You can review and submit the form now.`
         }]);
         setTimeout(() => onOpenChange(false), 2000);
-      } catch (e) {
+      } else {
         setMessages(prev => [...prev, {
           role: 'bot',
-          content: `Please provide the date in YYYY-MM-DD format.`
+          content: `I couldn't understand that date format. Please provide your date of birth in YYYY-MM-DD format (e.g., 1990-01-15).`
         }]);
       }
     }
@@ -88,7 +109,10 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-custom-text">Chat with AI Assistant</DialogTitle>
+          <DialogTitle className="text-[#000034]">Chat with AI Assistant</DialogTitle>
+          <DialogDescription>
+            I'll help you fill out your intake form through conversation.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col h-[400px]">
           <ScrollArea className="flex-1 pr-4">
@@ -101,8 +125,8 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
                   <div
                     className={`rounded-lg px-4 py-2 max-w-[80%] ${
                       message.role === 'user'
-                        ? 'bg-custom-primary text-white'
-                        : 'bg-gray-100 text-custom-text'
+                        ? 'bg-[#7E5DED] text-white'
+                        : 'bg-gray-100 text-[#000034]'
                     }`}
                   >
                     {message.content}
@@ -116,9 +140,12 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1"
+              className="flex-1 border-[#7E5DED]/30 focus-visible:ring-[#7E5DED]"
             />
-            <Button type="submit" className="bg-custom-primary hover:bg-custom-primary/90">
+            <Button 
+              type="submit" 
+              className="bg-[#7E5DED] hover:bg-[#7E5DED]/90 text-white"
+            >
               <SendHorizontal className="h-4 w-4" />
             </Button>
           </form>

@@ -54,8 +54,8 @@ const IntakeForm = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-custom-background rounded-lg shadow-lg border-2 border-custom-primary/20">
-      <h2 className="text-2xl font-bold mb-6 text-center text-custom-text">Intake Form</h2>
+    <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-lg border-2 border-[#7E5DED]/20">
+      <h2 className="text-2xl font-bold mb-6 text-center text-[#000034]">Intake Form</h2>
       <AIChatbot form={form} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -64,12 +64,12 @@ const IntakeForm = () => {
             name="fullName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-custom-text">Full Name</FormLabel>
+                <FormLabel className="text-[#000034]">Full Name</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="John Doe" 
                     {...field} 
-                    className="border-custom-secondary focus:ring-custom-primary"
+                    className="border-[#04D3DC] focus-visible:ring-[#7E5DED]"
                   />
                 </FormControl>
                 <FormMessage className="text-red-500" />
@@ -82,13 +82,13 @@ const IntakeForm = () => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-custom-text">Email</FormLabel>
+                <FormLabel className="text-[#000034]">Email</FormLabel>
                 <FormControl>
                   <Input 
                     type="email" 
                     placeholder="john@example.com" 
                     {...field} 
-                    className="border-custom-secondary focus:ring-custom-primary"
+                    className="border-[#04D3DC] focus-visible:ring-[#7E5DED]"
                   />
                 </FormControl>
                 <FormMessage className="text-red-500" />
@@ -101,13 +101,13 @@ const IntakeForm = () => {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-custom-text">Phone Number</FormLabel>
+                <FormLabel className="text-[#000034]">Phone Number</FormLabel>
                 <FormControl>
                   <Input 
                     type="tel" 
                     placeholder="(123) 456-7890" 
                     {...field} 
-                    className="border-custom-secondary focus:ring-custom-primary"
+                    className="border-[#04D3DC] focus-visible:ring-[#7E5DED]"
                   />
                 </FormControl>
                 <FormMessage className="text-red-500" />
@@ -120,23 +120,23 @@ const IntakeForm = () => {
             name="dateOfBirth"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel className="text-custom-text">Date of Birth</FormLabel>
+                <FormLabel className="text-[#000034]">Date of Birth</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-full pl-3 text-left font-normal border-custom-secondary",
+                          "w-full pl-3 text-left font-normal border-[#04D3DC]",
                           !field.value && "text-muted-foreground"
                         )}
                       >
-                        {field.value ? (
+                        {field.value && isValidDate(field.value) ? (
                           format(field.value, "PPP")
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50 text-custom-primary" />
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50 text-[#7E5DED]" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -160,7 +160,7 @@ const IntakeForm = () => {
 
           <Button 
             type="submit" 
-            className="w-full bg-custom-primary hover:bg-custom-primary/90 text-white"
+            className="w-full bg-[#7E5DED] hover:bg-[#7E5DED]/90 text-white"
           >
             Submit
           </Button>
@@ -169,5 +169,10 @@ const IntakeForm = () => {
     </div>
   );
 };
+
+// Helper function to validate date objects
+function isValidDate(date: any): boolean {
+  return date instanceof Date && !isNaN(date.getTime());
+}
 
 export default IntakeForm;
