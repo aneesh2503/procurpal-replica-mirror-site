@@ -40,7 +40,7 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
   const handleDocumentProcess = (extractedText: string) => {
     setMessages(prev => [...prev, 
       { role: 'user', content: 'I uploaded a document.' },
-      { role: 'bot', content: 'I found the following information. I'll help you fill out the form with these details.' }
+      { role: 'bot', content: "I found the following information. I'll help you fill out the form with these details." }
     ]);
 
     // Parse the extracted text and set form values
