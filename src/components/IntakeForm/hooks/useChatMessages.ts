@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { type UseFormReturn } from 'react-hook-form';
 import { type FormData } from '../IntakeForm';
@@ -12,12 +11,41 @@ export const useChatMessages = (
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'bot',
-      content: "Hi! I'm here to help you fill out the intake form. You can either upload a document with your project details, or I can guide you through the form step by step. Would you like to upload a document?"
+      content: "Hi! I can help you fill out the intake form in two ways:",
+      options: [
+        { label: 'A: Upload a document with project details', value: 'upload' },
+        { label: 'B: Guide me through the form step by step', value: 'manual' }
+      ]
     }
   ]);
 
   const addMessage = (message: Message) => {
     setMessages(prev => [...prev, message]);
+  };
+
+  const processUserOption = (selectedOption: string) => {
+    addMessage({ role: 'user', content: selectedOption });
+
+    switch (selectedOption) {
+      case 'A: Upload a document with project details':
+        addMessage({ 
+          role: 'bot', 
+          content: "Great! Let's upload a document with your project details." 
+        });
+        // Trigger document upload dialog
+        break;
+      case 'B: Guide me through the form step by step':
+        addMessage({
+          role: 'bot',
+          content: "Let's start by identifying your Business Unit. Which Business Unit are you from?"
+        });
+        break;
+      default:
+        addMessage({
+          role: 'bot',
+          content: "I'm sorry, I didn't understand your choice. Please select option A or B."
+        });
+    }
   };
 
   const handleDocumentProcess = (extractedText: string) => {
@@ -276,6 +304,7 @@ export const useChatMessages = (
   return {
     messages,
     handleDocumentProcess,
-    processUserInput
+    processUserInput,
+    processUserOption
   };
 };

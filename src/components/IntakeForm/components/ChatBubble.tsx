@@ -15,6 +15,18 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
         }`}
       >
         {message.content}
+        {message.options && (
+          <div className="mt-2 space-y-2">
+            {message.options.map((option) => (
+              <div 
+                key={option.value} 
+                className="text-sm text-gray-700"
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -23,7 +23,21 @@ interface ChatDialogProps {
 
 const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const { messages, handleDocumentProcess, processUserInput } = useChatMessages(form, onOpenChange);
+  const { 
+    messages, 
+    handleDocumentProcess, 
+    processUserInput, 
+    processUserOption 
+  } = useChatMessages(form, onOpenChange);
+
+  const handleSubmit = (message: string) => {
+    const latestMessage = messages[messages.length - 1];
+    if (latestMessage.options) {
+      processUserOption(message);
+    } else {
+      processUserInput(message);
+    }
+  };
 
   return (
     <>
@@ -44,8 +58,9 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
               </div>
             </ScrollArea>
             <ChatInput 
-              onSubmit={processUserInput}
+              onSubmit={handleSubmit}
               onUpload={() => setShowUploadDialog(true)}
+              messages={messages}
             />
           </div>
         </DialogContent>
