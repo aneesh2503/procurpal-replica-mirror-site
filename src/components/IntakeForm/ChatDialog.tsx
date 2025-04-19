@@ -30,7 +30,7 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'bot',
-      content: "Hi! I'm here to help you fill out the intake form. Let's start with your full name. What should I call you?"
+      content: "Hi! I'm here to help you fill out the intake form. Let's start with your Business Unit. Which Business Unit are you from?"
     }
   ]);
   const [input, setInput] = useState('');
@@ -42,25 +42,31 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
     // Simple logic to process responses and fill form
     const lastBotMessage = messages[messages.length - 1].content.toLowerCase();
     
-    if (lastBotMessage.includes('full name')) {
-      form.setValue('fullName', userMessage);
+    if (lastBotMessage.includes('business unit')) {
+      form.setValue('businessUnit', userMessage);
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: `Thanks! What's your email address?`
+        content: `Thanks! What category does your project fall under?`
       }]);
-    } else if (lastBotMessage.includes('email')) {
-      form.setValue('email', userMessage);
+    } else if (lastBotMessage.includes('category')) {
+      form.setValue('category', userMessage);
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: `Great! And your phone number?`
+        content: `Great! What's the name of your project?`
       }]);
-    } else if (lastBotMessage.includes('phone')) {
-      form.setValue('phone', userMessage);
+    } else if (lastBotMessage.includes('project name')) {
+      form.setValue('projectName', userMessage);
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: `Thanks! And finally, what's your date of birth? (YYYY-MM-DD format)`
+        content: `Thanks! And what's your estimated project budget?`
       }]);
-    } else if (lastBotMessage.includes('date of birth')) {
+    } else if (lastBotMessage.includes('budget')) {
+      form.setValue('projectBudget', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: `What's the due date for this project? (YYYY-MM-DD format)`
+      }]);
+    } else if (lastBotMessage.includes('due date')) {
       // Improved date parsing
       // Try different date formats
       const formats = ['yyyy-MM-dd', 'MM/dd/yyyy', 'dd/MM/yyyy'];
@@ -82,18 +88,24 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
       }
       
       if (validDate) {
-        form.setValue('dateOfBirth', validDate);
+        form.setValue('dueDate', validDate);
         setMessages(prev => [...prev, {
           role: 'bot',
-          content: `Perfect! I've filled out all your information. You can review and submit the form now.`
+          content: `Perfect! Lastly, what's the name of the first item you need for this project?`
         }]);
-        setTimeout(() => onOpenChange(false), 2000);
       } else {
         setMessages(prev => [...prev, {
           role: 'bot',
-          content: `I couldn't understand that date format. Please provide your date of birth in YYYY-MM-DD format (e.g., 1990-01-15).`
+          content: `I couldn't understand that date format. Please provide the due date in YYYY-MM-DD format (e.g., 2025-05-15).`
         }]);
       }
+    } else if (lastBotMessage.includes('item')) {
+      form.setValue('itemName', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: `Thank you! I've filled out the main information for your intake form. You can now review and complete any remaining fields before submitting.`
+      }]);
+      setTimeout(() => onOpenChange(false), 2000);
     }
   };
 
