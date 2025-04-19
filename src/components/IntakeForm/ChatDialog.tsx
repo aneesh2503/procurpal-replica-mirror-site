@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -90,74 +91,69 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
         }]);
       }
     } else if (lastBotMessage.includes('business unit')) {
-      // Simple logic to process responses and fill form
-      const lastBotMessage = messages[messages.length - 1].content.toLowerCase();
+      form.setValue('businessUnit', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: `Thanks! What category does your project fall under?`
+      }]);
+    } else if (lastBotMessage.includes('category')) {
+      form.setValue('category', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: `Great! What's the name of your project?`
+      }]);
+    } else if (lastBotMessage.includes('name of your project')) {
+      form.setValue('projectName', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: `Thanks! And what's your estimated project budget?`
+      }]);
+    } else if (lastBotMessage.includes('budget')) {
+      form.setValue('projectBudget', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: `What's the due date for this project? (YYYY-MM-DD format)`
+      }]);
+    } else if (lastBotMessage.includes('due date')) {
+      // Improved date parsing
+      // Try different date formats
+      const formats = ['yyyy-MM-dd', 'MM/dd/yyyy', 'dd/MM/yyyy'];
+      let validDate = null;
       
-      if (lastBotMessage.includes('business unit')) {
-        form.setValue('businessUnit', userMessage);
-        setMessages(prev => [...prev, {
-          role: 'bot',
-          content: `Thanks! What category does your project fall under?`
-        }]);
-      } else if (lastBotMessage.includes('category')) {
-        form.setValue('category', userMessage);
-        setMessages(prev => [...prev, {
-          role: 'bot',
-          content: `Great! What's the name of your project?`
-        }]);
-      } else if (lastBotMessage.includes('project name')) {
-        form.setValue('projectName', userMessage);
-        setMessages(prev => [...prev, {
-          role: 'bot',
-          content: `Thanks! And what's your estimated project budget?`
-        }]);
-      } else if (lastBotMessage.includes('budget')) {
-        form.setValue('projectBudget', userMessage);
-        setMessages(prev => [...prev, {
-          role: 'bot',
-          content: `What's the due date for this project? (YYYY-MM-DD format)`
-        }]);
-      } else if (lastBotMessage.includes('due date')) {
-        // Improved date parsing
-        // Try different date formats
-        const formats = ['yyyy-MM-dd', 'MM/dd/yyyy', 'dd/MM/yyyy'];
-        let validDate = null;
-        
-        // First try direct Date construction
-        const directDate = new Date(userMessage);
-        if (isValid(directDate) && directDate.toString() !== 'Invalid Date') {
-          validDate = directDate;
-        } else {
-          // Try parsing with different formats
-          for (const format of formats) {
-            const parsedDate = parse(userMessage, format, new Date());
-            if (isValid(parsedDate)) {
-              validDate = parsedDate;
-              break;
-            }
+      // First try direct Date construction
+      const directDate = new Date(userMessage);
+      if (isValid(directDate) && directDate.toString() !== 'Invalid Date') {
+        validDate = directDate;
+      } else {
+        // Try parsing with different formats
+        for (const format of formats) {
+          const parsedDate = parse(userMessage, format, new Date());
+          if (isValid(parsedDate)) {
+            validDate = parsedDate;
+            break;
           }
         }
-        
-        if (validDate) {
-          form.setValue('dueDate', validDate);
-          setMessages(prev => [...prev, {
-            role: 'bot',
-            content: `Perfect! Lastly, what's the name of the first item you need for this project?`
-          }]);
-        } else {
-          setMessages(prev => [...prev, {
-            role: 'bot',
-            content: `I couldn't understand that date format. Please provide the due date in YYYY-MM-DD format (e.g., 2025-05-15).`
-          }]);
-        }
-      } else if (lastBotMessage.includes('item')) {
-        form.setValue('itemName', userMessage);
+      }
+      
+      if (validDate) {
+        form.setValue('dueDate', validDate);
         setMessages(prev => [...prev, {
           role: 'bot',
-          content: `Thank you! I've filled out the main information for your intake form. You can now review and complete any remaining fields before submitting.`
+          content: `Perfect! Lastly, what's the name of the first item you need for this project?`
         }]);
-        setTimeout(() => onOpenChange(false), 2000);
+      } else {
+        setMessages(prev => [...prev, {
+          role: 'bot',
+          content: `I couldn't understand that date format. Please provide the due date in YYYY-MM-DD format (e.g., 2025-05-15).`
+        }]);
       }
+    } else if (lastBotMessage.includes('item')) {
+      form.setValue('itemName', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: `Thank you! I've filled out the main information for your intake form. You can now review and complete any remaining fields before submitting.`
+      }]);
+      setTimeout(() => onOpenChange(false), 2000);
     }
   };
 
