@@ -1,11 +1,12 @@
 
 import { useState } from 'react';
+import { type UseFormReturn } from 'react-hook-form';
 import { type FormData } from '../IntakeForm';
 import { isValid, parse } from 'date-fns';
 import { type Message } from '../types/chat';
 
 export const useChatMessages = (
-  form: FormData,
+  form: UseFormReturn<FormData>,
   onOpenChange: (open: boolean) => void
 ) => {
   const [messages, setMessages] = useState<Message[]>([
