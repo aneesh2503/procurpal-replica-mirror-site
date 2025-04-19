@@ -26,16 +26,14 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
   const { 
     messages, 
     handleDocumentProcess, 
-    processUserInput, 
-    processUserOption 
+    processUserOption,
+    handleOptionSelect 
   } = useChatMessages(form, onOpenChange);
 
   const handleSubmit = (message: string) => {
     const latestMessage = messages[messages.length - 1];
     if (latestMessage.options) {
       processUserOption(message);
-    } else {
-      processUserInput(message);
     }
   };
 
@@ -53,7 +51,15 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
             <ScrollArea className="flex-1 pr-4">
               <div className="space-y-4">
                 {messages.map((message, index) => (
-                  <ChatBubble key={index} message={message} />
+                  <ChatBubble 
+                    key={index} 
+                    message={message} 
+                    onOptionSelect={
+                      message.field ? 
+                        (option) => handleOptionSelect(option, message.field!) : 
+                        undefined
+                    }
+                  />
                 ))}
               </div>
             </ScrollArea>

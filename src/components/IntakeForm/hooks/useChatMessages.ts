@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { type UseFormReturn } from 'react-hook-form';
 import { type FormData } from '../IntakeForm';
 import { isValid, parse } from 'date-fns';
-import { type Message } from '../types/chat';
+import { type Message, type Option } from '../types/chat';
+import {
+  BUSINESS_UNITS,
+  PRIORITY_LEVELS,
+  INDUSTRIES,
+  CATEGORIES,
+  CURRENCIES,
+  UNITS_OF_MEASUREMENT
+} from '../constants/formOptions';
 
 export const useChatMessages = (
   form: UseFormReturn<FormData>,
@@ -23,28 +31,139 @@ export const useChatMessages = (
     setMessages(prev => [...prev, message]);
   };
 
+  const formatOptionsFromArray = (arr: string[]): Option[] => {
+    return arr.map(item => ({ label: item, value: item }));
+  };
+
+  const handleFieldOptions = (field: string) => {
+    switch (field) {
+      case 'businessUnit':
+        return formatOptionsFromArray(BUSINESS_UNITS);
+      case 'priority':
+        return formatOptionsFromArray(PRIORITY_LEVELS);
+      case 'industry':
+        return formatOptionsFromArray(INDUSTRIES);
+      case 'category':
+        return formatOptionsFromArray(CATEGORIES);
+      case 'currency':
+        return CURRENCIES;
+      case 'uom':
+        return UNITS_OF_MEASUREMENT;
+      default:
+        return [];
+    }
+  };
+
   const processUserOption = (selectedOption: string) => {
     addMessage({ role: 'user', content: selectedOption });
 
-    switch (selectedOption) {
-      case 'A: Upload a document with project details':
-        addMessage({ 
-          role: 'bot', 
-          content: "Great! Let's upload a document with your project details." 
-        });
-        // Trigger document upload dialog
-        break;
-      case 'B: Guide me through the form step by step':
+    if (selectedOption.startsWith('A:')) {
+      addMessage({ 
+        role: 'bot', 
+        content: "Great! Let's upload a document with your project details." 
+      });
+    } else {
+      addMessage({
+        role: 'bot',
+        content: "Let's start with your Business Unit. Which one do you belong to?",
+        options: handleFieldOptions('businessUnit'),
+        field: 'businessUnit'
+      });
+    }
+  };
+
+  const handleOptionSelect = (option: Option, field: string) => {
+    form.setValue(field as keyof FormData, option.value);
+    addMessage({ role: 'user', content: option.label });
+
+    // Progress to next field based on current field
+    switch (field) {
+      case 'businessUnit':
         addMessage({
           role: 'bot',
-          content: "Let's start by identifying your Business Unit. Which Business Unit are you from?"
+          content: 'What priority level would you assign to this project?',
+          options: handleFieldOptions('priority'),
+          field: 'priority'
         });
+        break;
+      case 'priority':
+        addMessage({
+          role: 'bot',
+          content: 'Which industry does this project belong to?',
+          options: handleFieldOptions('industry'),
+          field: 'industry'
+        });
+        break;
+      case 'industry':
+        addMessage({
+          role: 'bot',
+          content: 'What category best describes your project?',
+          options: handleFieldOptions('category'),
+          field: 'category'
+        });
+        break;
+      case 'category':
+        addMessage({
+          role: 'bot',
+          content: 'Please select the currency for this project:',
+          options: handleFieldOptions('currency'),
+          field: 'currency'
+        });
+        break;
+      case 'currency':
+        addMessage({
+          role: 'bot',
+          content: "What's the due date for this project? (YYYY-MM-DD format)"
+        });
+        break;
+      case 'dueDate':
+        addMessage({
+          role: 'bot',
+          content: "Could you provide a brief description of the project?"
+        });
+        break;
+      case 'projectDescription':
+        addMessage({
+          role: 'bot',
+          content: "Now let's add the first item. What's the name of the item?"
+        });
+        break;
+      case 'itemName':
+        addMessage({
+          role: 'bot',
+          content: "Please provide a description for this item."
+        });
+        break;
+      case 'itemDescription':
+        addMessage({
+          role: 'bot',
+          content: "What quantity do you need?"
+        });
+        break;
+      case 'quantity':
+        addMessage({
+          role: 'bot',
+          content: "What's the unit of measurement (UOM)?",
+          options: handleFieldOptions('uom'),
+          field: 'uom'
+        });
+        break;
+      case 'uom':
+        addMessage({
+          role: 'bot',
+          content: "Finally, what's the benchmark price for this item?"
+        });
+        break;
+      case 'benchmarkPrice':
+        addMessage({
+          role: 'bot',
+          content: "Perfect! I've filled out all the information for your intake form. You can now review and submit the form."
+        });
+        setTimeout(() => onOpenChange(false), 2000);
         break;
       default:
-        addMessage({
-          role: 'bot',
-          content: "I'm sorry, I didn't understand your choice. Please select option A or B."
-        });
+        // Handle other fields or completion
+        break;
     }
   };
 
@@ -305,6 +424,7 @@ export const useChatMessages = (
     messages,
     handleDocumentProcess,
     processUserInput,
-    processUserOption
+    processUserOption,
+    handleOptionSelect
   };
 };
