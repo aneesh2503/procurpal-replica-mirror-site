@@ -76,9 +76,7 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
   };
 
   const processUserInput = (userMessage: string) => {
-    // Add user message
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-
     const lastBotMessage = messages[messages.length - 1].content.toLowerCase();
     
     if (lastBotMessage.includes('upload a document')) {
@@ -87,45 +85,77 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
       } else {
         setMessages(prev => [...prev, {
           role: 'bot',
-          content: "Alright, let's fill out the form together. Which Business Unit are you from?"
+          content: "Let's fill out the form together. First, which Business Unit are you from?"
         }]);
       }
     } else if (lastBotMessage.includes('business unit')) {
       form.setValue('businessUnit', userMessage);
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: `Thanks! What category does your project fall under?`
+        content: "Thanks! Which region are you located in?"
+      }]);
+    } else if (lastBotMessage.includes('region')) {
+      form.setValue('region', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "Who is the end user for this project?"
+      }]);
+    } else if (lastBotMessage.includes('end user')) {
+      form.setValue('endUser', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "What priority level would you assign to this project?"
+      }]);
+    } else if (lastBotMessage.includes('priority')) {
+      form.setValue('priority', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "Which industry does this project belong to?"
+      }]);
+    } else if (lastBotMessage.includes('industry')) {
+      form.setValue('industry', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "What category does your project fall under?"
       }]);
     } else if (lastBotMessage.includes('category')) {
       form.setValue('category', userMessage);
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: `Great! What's the name of your project?`
+        content: "What's the cost center for this project?"
+      }]);
+    } else if (lastBotMessage.includes('cost center')) {
+      form.setValue('costCenter', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "Great! Now, what's the name of your project?"
       }]);
     } else if (lastBotMessage.includes('name of your project')) {
       form.setValue('projectName', userMessage);
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: `Thanks! And what's your estimated project budget?`
+        content: "What's the estimated budget for this project?"
       }]);
     } else if (lastBotMessage.includes('budget')) {
       form.setValue('projectBudget', userMessage);
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: `What's the due date for this project? (YYYY-MM-DD format)`
+        content: "What currency should be used for this project?"
+      }]);
+    } else if (lastBotMessage.includes('currency')) {
+      form.setValue('currency', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "What's the due date for this project? (YYYY-MM-DD format)"
       }]);
     } else if (lastBotMessage.includes('due date')) {
-      // Improved date parsing
-      // Try different date formats
       const formats = ['yyyy-MM-dd', 'MM/dd/yyyy', 'dd/MM/yyyy'];
       let validDate = null;
       
-      // First try direct Date construction
       const directDate = new Date(userMessage);
       if (isValid(directDate) && directDate.toString() !== 'Invalid Date') {
         validDate = directDate;
       } else {
-        // Try parsing with different formats
         for (const format of formats) {
           const parsedDate = parse(userMessage, format, new Date());
           if (isValid(parsedDate)) {
@@ -139,19 +169,49 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
         form.setValue('dueDate', validDate);
         setMessages(prev => [...prev, {
           role: 'bot',
-          content: `Perfect! Lastly, what's the name of the first item you need for this project?`
+          content: "Could you provide a brief description of the project?"
         }]);
       } else {
         setMessages(prev => [...prev, {
           role: 'bot',
-          content: `I couldn't understand that date format. Please provide the due date in YYYY-MM-DD format (e.g., 2025-05-15).`
+          content: "I couldn't understand that date format. Please provide the due date in YYYY-MM-DD format (e.g., 2025-05-15)."
         }]);
       }
-    } else if (lastBotMessage.includes('item')) {
+    } else if (lastBotMessage.includes('description of the project')) {
+      form.setValue('projectDescription', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "Now let's add the first item. What's the name of the item?"
+      }]);
+    } else if (lastBotMessage.includes("name of the item")) {
       form.setValue('itemName', userMessage);
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: `Thank you! I've filled out the main information for your intake form. You can now review and complete any remaining fields before submitting.`
+        content: "Please provide a description for this item."
+      }]);
+    } else if (lastBotMessage.includes("description for this item")) {
+      form.setValue('itemDescription', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "What quantity do you need?"
+      }]);
+    } else if (lastBotMessage.includes("quantity")) {
+      form.setValue('quantity', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "What's the unit of measurement (UOM)?"
+      }]);
+    } else if (lastBotMessage.includes("unit of measurement")) {
+      form.setValue('uom', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "Finally, what's the benchmark price for this item?"
+      }]);
+    } else if (lastBotMessage.includes("benchmark price")) {
+      form.setValue('benchmarkPrice', userMessage);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: "Perfect! I've filled out all the information for your intake form. You can now review and submit the form. Would you like to add another item?"
       }]);
       setTimeout(() => onOpenChange(false), 2000);
     }
