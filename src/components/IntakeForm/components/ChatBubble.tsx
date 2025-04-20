@@ -19,7 +19,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
 
   return (
     <div
-      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-3`}
+      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
     >
       <div
         className={`rounded-lg px-4 py-3 max-w-[90%] ${
@@ -28,10 +28,10 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
             : 'bg-gray-100 text-[#000034]'
         }`}
       >
-        <div className="mb-2">{message.content}</div>
+        <div className="mb-2 text-lg">{message.content}</div>
         
         {hasMultipleOptions && hasLargeOptionList && (
-          <div className="mt-3 mb-2">
+          <div className="mt-4 mb-2">
             <Command className="rounded-lg border border-[#7E5DED]/30 shadow-sm">
               <CommandInput 
                 placeholder="Search options..." 
@@ -42,13 +42,13 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
               <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
-                  <ScrollArea className="h-[200px]">
+                  <ScrollArea className="h-[300px]">
                     {(filteredOptions || []).map((option) => (
                       <CommandItem 
                         key={option.value}
                         value={option.value}
                         onSelect={() => onOptionSelect?.(option)}
-                        className="cursor-pointer hover:bg-[#7E5DED]/10 py-2 px-2"
+                        className="cursor-pointer hover:bg-[#7E5DED]/10 py-3 px-2"
                       >
                         {option.label}
                       </CommandItem>
@@ -61,13 +61,13 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
         )}
         
         {hasMultipleOptions && !hasLargeOptionList && (
-          <div className="mt-3 space-y-2">
+          <div className="mt-4 space-y-2">
             {(filteredOptions || message.options).map((option) => (
               <Button
                 key={option.value}
                 onClick={() => onOptionSelect?.(option)}
                 variant="outline"
-                className="w-full justify-start text-left whitespace-normal h-auto py-2 border-[#7E5DED] text-[#7E5DED] hover:bg-[#7E5DED]/10"
+                className="w-full justify-start text-left whitespace-normal h-auto py-3 border-[#7E5DED] text-[#7E5DED] hover:bg-[#7E5DED]/10"
               >
                 {option.label}
               </Button>

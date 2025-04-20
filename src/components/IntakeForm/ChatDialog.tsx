@@ -39,7 +39,6 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
     }
   };
 
-  // Auto-scroll to bottom when new messages appear
   useEffect(() => {
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -52,19 +51,19 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[550px] w-full max-h-[90vh]">
+        <DialogContent className="sm:max-w-[800px] w-full max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="text-[#000034] text-xl">Chat with AI Assistant</DialogTitle>
             <DialogDescription>
-              I'll help you fill out your intake form through conversation.
+              I'll help you fill out your intake form through conversation. Just choose your options or type your responses.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col h-[550px]">
+          <div className="flex flex-col h-[600px]">
             <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
               <div className="space-y-4 p-1">
                 {messages.map((message, index) => (
                   <ChatBubble 
-                    key={index} 
+                    key={`${message.content}-${index}`}
                     message={message} 
                     onOptionSelect={
                       message.field ? 
