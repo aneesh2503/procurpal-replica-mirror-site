@@ -1,14 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { type ChatBubbleProps } from '../types/chat';
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const filteredOptions = message.options?.filter(option =>
     option.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -22,7 +21,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
       className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
     >
       <div
-        className={`rounded-lg px-4 py-3 max-w-[90%] ${
+        className={`rounded-lg px-4 py-3 max-w-[85%] ${
           message.role === 'user'
             ? 'bg-[#7E5DED] text-white'
             : 'bg-gray-100 text-[#000034]'
@@ -32,7 +31,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
         
         {hasMultipleOptions && hasLargeOptionList && (
           <div className="mt-4 mb-2">
-            <Command className="rounded-lg border border-[#7E5DED]/30 shadow-sm">
+            <Command className="rounded-lg border border-[#7E5DED]/30 shadow-sm bg-white">
               <CommandInput 
                 placeholder="Search options..." 
                 value={searchTerm}
@@ -47,7 +46,10 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
                       <CommandItem 
                         key={option.value}
                         value={option.value}
-                        onSelect={() => onOptionSelect?.(option)}
+                        onSelect={() => {
+                          onOptionSelect?.(option);
+                          setSearchTerm('');
+                        }}
                         className="cursor-pointer hover:bg-[#7E5DED]/10 py-3 px-2"
                       >
                         {option.label}

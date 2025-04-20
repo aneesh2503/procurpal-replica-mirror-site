@@ -28,16 +28,8 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
   const { 
     messages, 
     handleDocumentProcess, 
-    processUserOption,
     handleOptionSelect 
   } = useChatMessages(form, onOpenChange);
-
-  const handleSubmit = (message: string) => {
-    const latestMessage = messages[messages.length - 1];
-    if (latestMessage.options) {
-      processUserOption(message);
-    }
-  };
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -48,22 +40,26 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
     }
   }, [messages]);
 
+  const handleSubmit = (message: string) => {
+    // This is now handled directly in the chat input component
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[800px] w-full max-h-[90vh]">
+        <DialogContent className="sm:max-w-[90vw] md:max-w-[800px] w-full max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="text-[#000034] text-xl">Chat with AI Assistant</DialogTitle>
             <DialogDescription>
               I'll help you fill out your intake form through conversation. Just choose your options or type your responses.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col h-[600px]">
+          <div className="flex flex-col h-[70vh]">
             <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
               <div className="space-y-4 p-1">
                 {messages.map((message, index) => (
                   <ChatBubble 
-                    key={`${message.content}-${index}`}
+                    key={`${message.id || index}-${message.content}`}
                     message={message} 
                     onOptionSelect={
                       message.field ? 

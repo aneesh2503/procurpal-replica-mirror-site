@@ -9,7 +9,7 @@ export interface Message {
   content: string;
   options?: Option[];
   field?: string;
-  id?: string; // Add unique ID to prevent duplicate messages
+  id?: string; // Unique ID to prevent duplicate messages
 }
 
 export interface ChatBubbleProps {
