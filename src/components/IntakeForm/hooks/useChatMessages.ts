@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { type UseFormReturn } from 'react-hook-form';
 import { type FormData } from '../IntakeForm';
@@ -30,7 +29,6 @@ export const useChatMessages = (
   ]);
 
   const addMessage = (message: Message) => {
-    // Ensure each message has a unique ID
     const messageWithId = {
       ...message,
       id: message.id || `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
@@ -80,7 +78,13 @@ export const useChatMessages = (
   };
 
   const handleOptionSelect = (option: Option, field: string) => {
-    form.setValue(field as keyof FormData, option.value);
+    if (field === 'dueDate') {
+      const date = new Date(option.value);
+      form.setValue(field as keyof FormData, date);
+    } else {
+      form.setValue(field as keyof FormData, option.value);
+    }
+    
     addMessage({ role: 'user', content: option.label });
 
     // Progress to next field based on current field
@@ -120,13 +124,15 @@ export const useChatMessages = (
       case 'currency':
         addMessage({
           role: 'bot',
-          content: "What's the due date for this project? (YYYY-MM-DD format)"
+          content: "When do you need this project completed? Please select a due date.",
+          field: 'dueDate'
         });
         break;
       case 'dueDate':
         addMessage({
           role: 'bot',
-          content: "Could you provide a brief description of the project?"
+          content: "Great! Could you provide a brief description of the project requirements?",
+          field: 'projectDescription'
         });
         break;
       case 'projectDescription':
@@ -285,16 +291,13 @@ export const useChatMessages = (
   };
 
   const processUserInput = (userMessage: string) => {
-    // Add user message to chat
     addMessage({ role: 'user', content: userMessage });
     
-    // Find last bot message with a field
     const lastBotMessageWithField = [...messages].reverse().find(
       m => m.role === 'bot' && m.field
     );
     
     if (lastBotMessageWithField && lastBotMessageWithField.field) {
-      // If it's a date field, try to parse it
       if (lastBotMessageWithField.field === 'dueDate') {
         try {
           const date = new Date(userMessage);
@@ -314,12 +317,10 @@ export const useChatMessages = (
           });
         }
       } else {
-        // For other fields, just set the value directly
         form.setValue(lastBotMessageWithField.field as keyof FormData, userMessage);
         handleOptionSelect({ label: userMessage, value: userMessage }, lastBotMessageWithField.field);
       }
     } else {
-      // If there's no specific field context, provide general guidance
       addMessage({
         role: 'bot',
         content: "I'm here to help you fill out the intake form. Do you want me to guide you through it step by step?",

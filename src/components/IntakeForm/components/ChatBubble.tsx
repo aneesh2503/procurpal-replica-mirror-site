@@ -1,13 +1,21 @@
-
 import React, { useState } from 'react';
 import { type ChatBubbleProps } from '../types/chat';
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [date, setDate] = useState<Date>();
 
   const filteredOptions = message.options?.filter(option =>
     option.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -15,6 +23,17 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
 
   const hasMultipleOptions = message.options && message.options.length > 1;
   const hasLargeOptionList = message.options && message.options.length > 8;
+  const isDateField = message.field === 'dueDate';
+
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      setDate(selectedDate);
+      onOptionSelect?.({ 
+        label: format(selectedDate, "PPP"), 
+        value: selectedDate.toISOString() 
+      });
+    }
+  };
 
   return (
     <div
@@ -29,7 +48,40 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
       >
         <div className="mb-2 text-lg">{message.content}</div>
         
-        {hasMultipleOptions && hasLargeOptionList && (
+        {isDateField && (
+          <div className="mt-4">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal border-[#7E5DED]",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  {date ? (
+                    format(date, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50 text-[#7E5DED]" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={handleDateSelect}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
+        
+        {hasMultipleOptions && hasLargeOptionList && !isDateField && (
           <div className="mt-4 mb-2">
             <Command className="rounded-lg border border-[#7E5DED]/30 shadow-sm bg-white">
               <CommandInput 
@@ -62,7 +114,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
           </div>
         )}
         
-        {hasMultipleOptions && !hasLargeOptionList && (
+        {hasMultipleOptions && !hasLargeOptionList && !isDateField && (
           <div className="mt-4 space-y-2">
             {(filteredOptions || message.options).map((option) => (
               <Button
@@ -77,7 +129,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
           </div>
         )}
         
-        {message.options && message.options.length === 1 && (
+        {message.options && message.options.length === 1 && !isDateField && (
           <div className="mt-4">
             <Button
               onClick={() => onOptionSelect?.(message.options![0])}
