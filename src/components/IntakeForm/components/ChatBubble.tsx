@@ -4,6 +4,8 @@ import { type ChatBubbleProps } from '../types/chat';
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -12,31 +14,54 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
     option.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const hasMultipleOptions = message.options && message.options.length > 1;
+  const hasLargeOptionList = message.options && message.options.length > 8;
+
   return (
     <div
-      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-3`}
     >
       <div
-        className={`rounded-lg px-4 py-2 max-w-[80%] ${
+        className={`rounded-lg px-4 py-3 max-w-[90%] ${
           message.role === 'user'
             ? 'bg-[#7E5DED] text-white'
             : 'bg-gray-100 text-[#000034]'
         }`}
       >
-        <div>{message.content}</div>
-        {message.options && message.options.length > 8 && (
-          <div className="mt-2 relative">
-            <Input
-              placeholder="Search options..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 border-[#7E5DED]/30 focus-visible:ring-[#7E5DED]"
-            />
-            <Search className="absolute left-2 top-3 h-4 w-4 text-gray-400" />
+        <div className="mb-2">{message.content}</div>
+        
+        {hasMultipleOptions && hasLargeOptionList && (
+          <div className="mt-3 mb-2">
+            <Command className="rounded-lg border border-[#7E5DED]/30 shadow-sm">
+              <CommandInput 
+                placeholder="Search options..." 
+                value={searchTerm}
+                onValueChange={setSearchTerm}
+                className="border-0"
+              />
+              <CommandList>
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup>
+                  <ScrollArea className="h-[200px]">
+                    {(filteredOptions || []).map((option) => (
+                      <CommandItem 
+                        key={option.value}
+                        value={option.value}
+                        onSelect={() => onOptionSelect?.(option)}
+                        className="cursor-pointer hover:bg-[#7E5DED]/10 py-2 px-2"
+                      >
+                        {option.label}
+                      </CommandItem>
+                    ))}
+                  </ScrollArea>
+                </CommandGroup>
+              </CommandList>
+            </Command>
           </div>
         )}
-        {message.options && (
-          <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+        
+        {hasMultipleOptions && !hasLargeOptionList && (
+          <div className="mt-3 space-y-2">
             {(filteredOptions || message.options).map((option) => (
               <Button
                 key={option.value}

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,8 @@ interface ChatDialogProps {
 
 const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  
   const { 
     messages, 
     handleDocumentProcess, 
@@ -37,19 +39,29 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
     }
   };
 
+  // Auto-scroll to bottom when new messages appear
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  }, [messages]);
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[550px] w-full max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle className="text-[#000034]">Chat with AI Assistant</DialogTitle>
+            <DialogTitle className="text-[#000034] text-xl">Chat with AI Assistant</DialogTitle>
             <DialogDescription>
               I'll help you fill out your intake form through conversation.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col h-[400px]">
-            <ScrollArea className="flex-1 pr-4">
-              <div className="space-y-4">
+          <div className="flex flex-col h-[550px]">
+            <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
+              <div className="space-y-4 p-1">
                 {messages.map((message, index) => (
                   <ChatBubble 
                     key={index} 
