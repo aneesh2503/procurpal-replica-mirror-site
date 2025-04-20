@@ -76,6 +76,18 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onOptionSelect }) => {
             ))}
           </div>
         )}
+        
+        {message.options && message.options.length === 1 && (
+          <div className="mt-4">
+            <Button
+              onClick={() => onOptionSelect?.(message.options![0])}
+              variant="outline"
+              className="w-full justify-start text-left whitespace-normal h-auto py-3 border-[#7E5DED] text-[#7E5DED] hover:bg-[#7E5DED]/10"
+            >
+              {message.options[0].label}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

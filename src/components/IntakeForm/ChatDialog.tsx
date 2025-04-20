@@ -28,7 +28,9 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
   const { 
     messages, 
     handleDocumentProcess, 
-    handleOptionSelect 
+    handleOptionSelect,
+    processUserInput,
+    processUserOption
   } = useChatMessages(form, onOpenChange);
 
   useEffect(() => {
@@ -40,8 +42,8 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
     }
   }, [messages]);
 
-  const handleSubmit = (message: string) => {
-    // This is now handled directly in the chat input component
+  const handleUserInput = (message: string) => {
+    processUserInput(message);
   };
 
   return (
@@ -62,8 +64,14 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
                     key={`${message.id || index}-${message.content}`}
                     message={message} 
                     onOptionSelect={
-                      message.field ? 
-                        (option) => handleOptionSelect(option, message.field!) : 
+                      message.options && message.options.length > 0 ? 
+                        (option) => {
+                          if (message.field) {
+                            handleOptionSelect(option, message.field);
+                          } else {
+                            processUserOption(option.value);
+                          }
+                        } : 
                         undefined
                     }
                   />
@@ -71,7 +79,7 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange, form }) => 
               </div>
             </ScrollArea>
             <ChatInput 
-              onSubmit={handleSubmit}
+              onSubmit={handleUserInput}
               onUpload={() => setShowUploadDialog(true)}
               messages={messages}
             />

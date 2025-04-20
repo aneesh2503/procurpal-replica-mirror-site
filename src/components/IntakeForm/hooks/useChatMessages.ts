@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { type UseFormReturn } from 'react-hook-form';
 import { type FormData } from '../IntakeForm';
-import { isValid, parse } from 'date-fns';
+import { isValid } from 'date-fns';
 import { type Message, type Option } from '../types/chat';
 import {
   BUSINESS_UNITS,
@@ -33,7 +33,7 @@ export const useChatMessages = (
     // Ensure each message has a unique ID
     const messageWithId = {
       ...message,
-      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+      id: message.id || `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
     };
     setMessages(prev => [...prev, messageWithId]);
   };
@@ -169,8 +169,61 @@ export const useChatMessages = (
         setTimeout(() => onOpenChange(false), 2000);
         break;
       default:
-        // Handle other fields or completion
+        // Handle text inputs
+        const nextField = getNextField(field);
+        if (nextField) {
+          addMessage({
+            role: 'bot',
+            content: getPromptForField(nextField),
+            options: handleFieldOptions(nextField),
+            field: nextField
+          });
+        }
         break;
+    }
+  };
+
+  const getNextField = (currentField: string): string => {
+    const fieldSequence: string[] = [
+      'businessUnit', 'priority', 'industry', 'category', 'currency', 'dueDate',
+      'projectDescription', 'itemName', 'itemDescription', 'quantity', 'uom', 'benchmarkPrice'
+    ];
+    
+    const currentIndex = fieldSequence.indexOf(currentField);
+    if (currentIndex >= 0 && currentIndex < fieldSequence.length - 1) {
+      return fieldSequence[currentIndex + 1];
+    }
+    return '';
+  };
+
+  const getPromptForField = (field: string): string => {
+    switch (field) {
+      case 'businessUnit':
+        return "Which business unit do you belong to?";
+      case 'priority':
+        return "What priority level would you assign to this project?";
+      case 'industry':
+        return "Which industry does this project belong to?";
+      case 'category':
+        return "What category best describes your project?";
+      case 'currency':
+        return "Please select the currency for this project:";
+      case 'dueDate':
+        return "What's the due date for this project? (YYYY-MM-DD format)";
+      case 'projectDescription':
+        return "Could you provide a brief description of the project?";
+      case 'itemName':
+        return "What's the name of the item?";
+      case 'itemDescription':
+        return "Please provide a description for this item.";
+      case 'quantity':
+        return "What quantity do you need?";
+      case 'uom':
+        return "What's the unit of measurement (UOM)?";
+      case 'benchmarkPrice':
+        return "What's the benchmark price for this item?";
+      default:
+        return "Please provide more information:";
     }
   };
 
@@ -182,44 +235,99 @@ export const useChatMessages = (
     });
 
     const lines = extractedText.split('\n');
+    let fieldsProcessed = false;
+    
     lines.forEach(line => {
       const [key, value] = line.split(': ');
-      switch(key) {
-        case 'Business Unit':
-          form.setValue('businessUnit', value);
-          break;
-        case 'Category':
-          form.setValue('category', value);
-          break;
-        case 'Project Name':
-          form.setValue('projectName', value);
-          break;
-        case 'Project Budget':
-          form.setValue('projectBudget', value);
-          break;
-        case 'Due Date':
-          const date = new Date(value);
-          if (isValid(date)) {
-            form.setValue('dueDate', date);
-          }
-          break;
+      if (key && value) {
+        fieldsProcessed = true;
+        switch(key) {
+          case 'Business Unit':
+            form.setValue('businessUnit', value);
+            break;
+          case 'Category':
+            form.setValue('category', value);
+            break;
+          case 'Project Name':
+            form.setValue('projectName', value);
+            break;
+          case 'Project Budget':
+            form.setValue('projectBudget', value);
+            break;
+          case 'Due Date':
+            const date = new Date(value);
+            if (isValid(date)) {
+              form.setValue('dueDate', date);
+            }
+            break;
+        }
       }
     });
 
-    addMessage({
-      role: 'bot',
-      content: "I've filled out some information from your document. Would you like to review and complete any remaining fields?",
-      options: [
-        { label: 'Yes, let me review what was filled', value: 'review' },
-        { label: 'Yes, let me complete the remaining fields', value: 'complete' }
-      ]
-    });
+    if (fieldsProcessed) {
+      addMessage({
+        role: 'bot',
+        content: "I've filled out some information from your document. Would you like to review and complete any remaining fields?",
+        options: [
+          { label: 'Yes, let me review what was filled', value: 'review' },
+          { label: 'Yes, let me complete the remaining fields', value: 'complete' }
+        ]
+      });
+    } else {
+      addMessage({
+        role: 'bot',
+        content: "I couldn't extract any structured data from the document. Would you like me to guide you through filling the form manually?",
+        options: [
+          { label: 'Yes, guide me through the form', value: 'manual' }
+        ]
+      });
+    }
   };
 
-  // This function remains for reference but is now handled by other components
   const processUserInput = (userMessage: string) => {
-    // Only retain this for compatibility
-    console.log("Processing user input:", userMessage);
+    // Add user message to chat
+    addMessage({ role: 'user', content: userMessage });
+    
+    // Find last bot message with a field
+    const lastBotMessageWithField = [...messages].reverse().find(
+      m => m.role === 'bot' && m.field
+    );
+    
+    if (lastBotMessageWithField && lastBotMessageWithField.field) {
+      // If it's a date field, try to parse it
+      if (lastBotMessageWithField.field === 'dueDate') {
+        try {
+          const date = new Date(userMessage);
+          if (isValid(date)) {
+            form.setValue('dueDate', date);
+            handleOptionSelect({ label: userMessage, value: userMessage }, 'dueDate');
+          } else {
+            addMessage({
+              role: 'bot',
+              content: "I couldn't understand that date format. Please provide a date in YYYY-MM-DD format.",
+            });
+          }
+        } catch (e) {
+          addMessage({
+            role: 'bot',
+            content: "Please provide a valid date in YYYY-MM-DD format.",
+          });
+        }
+      } else {
+        // For other fields, just set the value directly
+        form.setValue(lastBotMessageWithField.field as keyof FormData, userMessage);
+        handleOptionSelect({ label: userMessage, value: userMessage }, lastBotMessageWithField.field);
+      }
+    } else {
+      // If there's no specific field context, provide general guidance
+      addMessage({
+        role: 'bot',
+        content: "I'm here to help you fill out the intake form. Do you want me to guide you through it step by step?",
+        options: [
+          { label: 'Yes, guide me through the form', value: 'manual' }
+        ]
+      });
+    }
   };
 
   return {
